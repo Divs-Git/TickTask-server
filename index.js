@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { connectDB } from './utils/index.js';
 import e from 'express';
+import { errorHandler, routeNotFound } from './middlewares/errorMiddleware.js';
 
 const routes = '';
 dotenv.config();
@@ -30,8 +31,8 @@ app.use(morgan('dev'));
 
 // app.use('/api', routes);
 
-// app.use(routeNotFound);
-// app.use(errorHandler);
+app.use(routeNotFound);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
