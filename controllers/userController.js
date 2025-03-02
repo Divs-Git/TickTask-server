@@ -142,3 +142,105 @@ export const getNotificationsList = async (req, res) => {
     return res.status(400).json({ status: false, message: error.message });
   }
 };
+
+export const updateUserProfile = async (req, res) => {
+  try {
+    const { userId, isAdmin } = req.user;
+
+    const { _id } = req.body;
+
+    const id =
+      isAdmin && userId === _id // admin updating own profile
+        ? userId
+        : isAdmin && userId !== _id // admin updating other user profile
+        ? _id
+        : userId; // user updating own profile
+
+    const user = await User.findById(id);
+
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.title = req.body.title || user.title;
+      user.role = req.body.role || user.role;
+
+      const updatedUser = await User.save();
+
+      user.password = undefined;
+
+      res.status(201).json({
+        status: true,
+        message: 'Profile Updated Successfully',
+        user: updatedUser,
+      });
+    } else {
+      res.status(404).json({ status: false, message: 'User not found' });
+    }
+  } catch (error) {
+    console.log('error', error);
+    return res.status(400).json({ status: false, message: error.message });
+  }
+};
+
+export const markNotificationRead = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const { isReadType, id } = req.query;
+
+    if (isReadType === 'all') {
+      await Notification.updateMany(
+        {
+          team: userId,
+          isRead: {
+            $nin: [userId],
+          },
+        },
+        { $push: { isRead: userId } },
+        {
+          new: true,
+        }
+      );
+    } else {
+      await Notification.findOneAndUpdate(
+        {
+          _id: id,
+          isRead: {
+            $nin: [userId],
+          },
+        },
+        {
+          $push: { isRead: userId },
+        },
+        {
+          new: true,
+        }
+      );
+    }
+  } catch (error) {
+    console.log('error', error);
+    return res.status(400).json({ status: false, message: error.message });
+  }
+};
+
+export const changeUserPassword = async (req, res) => {
+  try {
+    const { userId } = req.user;
+
+    const user = await User.findById(userId);
+
+    if (user) {
+      user.password = req.body.password;
+
+      await user.save();
+      user.password = undefined;
+      res.status(201).json({
+        status: true,
+        message: 'Password changed successfully',
+      });
+    } else {
+      return res.status(404).json({ status: false, message: 'User not found' });
+    }
+  } catch (error) {
+    console.log('error', error);
+    return res.status(400).json({ status: false, message: error.message });
+  }
+};
