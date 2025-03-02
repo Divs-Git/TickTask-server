@@ -6,8 +6,8 @@ import dotenv from 'dotenv';
 import { connectDB } from './utils/index.js';
 import e from 'express';
 import { errorHandler, routeNotFound } from './middlewares/errorMiddleware.js';
+import routes from './routes/index.js';
 
-const routes = '';
 dotenv.config();
 
 connectDB();
@@ -29,7 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan('dev'));
 
-// app.use('/api', routes);
+app.use('/api', routes);
 
 app.use(routeNotFound);
 app.use(errorHandler);
