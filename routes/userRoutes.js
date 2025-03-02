@@ -1,7 +1,9 @@
 import express from 'express';
 import { isAdminRoute, protectRoute } from '../middlewares/authMiddleware.js';
 import {
+  activateUserProfile,
   changeUserPassword,
+  deleteUserProfile,
   getNotificationsList,
   getTeamList,
   loginUser,
@@ -25,4 +27,9 @@ router.put('/profile', protectRoute, updateUserProfile);
 router.put('/read-notification', protectRoute, markNotificationRead);
 router.put('/change-password', protectRoute, changeUserPassword);
 
+// For admin only
+router
+  .route('/:id')
+  .put(protectRoute, isAdminRoute, activateUserProfile)
+  .delete(protectRoute, isAdminRoute, deleteUserProfile);
 export default router;
