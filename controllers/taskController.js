@@ -127,7 +127,7 @@ export const dashboardStatistics = async (req, res) => {
   try {
     const { userId, isAdmin } = req.user;
 
-    const allTask = isAdmin
+    const allTasks = isAdmin
       ? await Task.find({
           isTrashed: false,
         })
@@ -151,8 +151,8 @@ export const dashboardStatistics = async (req, res) => {
       .limit(10)
       .sort({ _id: -1 });
 
-    // grouup task by stage and calculate count
-    const groupTasks = allTask.reduce((result, task) => {
+    //   group task by stage and calculate counts
+    const groupTaskks = allTasks.reduce((result, task) => {
       const stage = task.stage;
 
       if (!result[stage]) {
@@ -164,26 +164,25 @@ export const dashboardStatistics = async (req, res) => {
       return result;
     }, {});
 
-    // group by priority
+    // Group tasks by priority
     const groupData = Object.entries(
-      allTask
-        .reduce((result, task) => {
-          const { priority } = task;
+      allTasks.reduce((result, task) => {
+        const { priority } = task;
 
-          result[priority] = (result[priority] || 0) + 1;
-        }, {})
-        .map((name, total) => ({ name, total }))
-    );
+        result[priority] = (result[priority] || 0) + 1;
+        return result;
+      }, {})
+    ).map(([name, total]) => ({ name, total }));
 
     // calculate total tasks
-    const totalTasks = allTask.length;
-    const last10Task = allTask.slice(0, 10);
+    const totalTasks = allTasks?.length;
+    const last10Task = allTasks?.slice(0, 10);
 
     const summary = {
       totalTasks,
       last10Task,
       users: isAdmin ? users : [],
-      tasks: groupTasks,
+      tasks: groupTaskks,
       graphData: groupData,
     };
 

@@ -22,7 +22,7 @@ router.post('/logout', logoutUser);
 
 // Protected routes
 router.get('/get-team', protectRoute, isAdminRoute, getTeamList);
-router.get('notifications', protectRoute, getNotificationsList);
+router.get('/notifications', protectRoute, getNotificationsList);
 router.put('/profile', protectRoute, updateUserProfile);
 router.put('/read-notification', protectRoute, markNotificationRead);
 router.put('/change-password', protectRoute, changeUserPassword);
