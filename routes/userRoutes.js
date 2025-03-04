@@ -18,7 +18,7 @@ const router = express.Router();
 // Public routes
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.get('/logout', logoutUser);
+router.post('/logout', logoutUser);
 
 // Protected routes
 router.get('/get-team', protectRoute, isAdminRoute, getTeamList);
