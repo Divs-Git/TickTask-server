@@ -1,4 +1,4 @@
-import User from '../models/User.js';
+import User from '../models/user.js';
 import { createJWT } from '../utils/index.js';
 import Notification from './../models/notification.js';
 
