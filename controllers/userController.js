@@ -117,12 +117,11 @@ export const logoutUser = async (req, res) => {
 
 export const getTeamList = async (req, res) => {
   try {
-    const users = await User.find({ email }).select(
-      'name title role email is Active'
-    );
+    const users = await User.find().select('name title role email isActive');
+
     res.status(200).json(users);
   } catch (error) {
-    console.log('error', error);
+    console.log(error);
     return res.status(400).json({ status: false, message: error.message });
   }
 };
@@ -163,7 +162,7 @@ export const updateUserProfile = async (req, res) => {
       user.title = req.body.title || user.title;
       user.role = req.body.role || user.role;
 
-      const updatedUser = await User.save();
+      const updatedUser = await user.save();
 
       user.password = undefined;
 
