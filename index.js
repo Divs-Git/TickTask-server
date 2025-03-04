@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 5000;
 
 const app = express();
 
-const prodOrigin = [process.env.ORIGIN_1];
+const prodOrigin = [process.env.ORIGIN_1, process.env.ORIGIN_2];
 const devOrigin = ['http://localhost:3000'];
 
 const allowedOrigins =
