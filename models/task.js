@@ -20,29 +20,31 @@ const taskSchema = new mongoose.Schema(
       default: 'todo',
       enum: ['todo', 'in progress', 'completed'],
     },
-    activities: {
-      type: {
-        type: String,
-        default: 'assigned',
-        enum: [
-          'assigned',
-          'in progress',
-          'completed',
-          'started',
-          'commented',
-          'bug',
-        ],
+    activities: [
+      {
+        type: {
+          type: String,
+          default: 'assigned',
+          enum: [
+            'assigned',
+            'in progress',
+            'completed',
+            'started',
+            'commented',
+            'bug',
+          ],
+        },
+        activity: String,
+        date: {
+          type: Date,
+          default: Date.now,
+        },
+        by: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+        },
       },
-      activity: String,
-      date: {
-        type: Date,
-        default: Date.now,
-      },
-      by: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-      },
-    },
+    ],
 
     subTasks: [
       {

@@ -1,12 +1,48 @@
 import Task from './../models/task.js';
 import User from '../models/User.js';
 import Notification from '../models/notification.js';
+import { v2 as cloudinary } from 'cloudinary';
+
+const convertBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const fileReader = new FileReader();
+    fileReader.readAsDataURL(file);
+
+    fileReader.onload = () => {
+      resolve(fileReader.result);
+    };
+
+    fileReader.onerror = (error) => {
+      reject(error);
+    };
+  });
+};
 
 export const createTask = async (req, res) => {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_SECRET_KEY,
+    secure: true,
+  });
   try {
     const { userId } = req.user;
     const { title, team, stage, date, priority, assets } = req.body;
+    console.log(assets[0]);
+    let imgPath = '';
+    if (assets.length > 0) {
+      imgPath = await convertBase64(assets[0]);
+    }
 
+    let result = '';
+    console.log(imgPath);
+
+    if (imgPath) {
+      result = await cloudinary.uploader.upload(imgPath, {
+        folder: 'ticktask',
+      });
+    }
+    console.log(result);
     let text = 'New Task has been assigned to you';
     if (team.length > 1) {
       text = text + ` and ${team.length - 1} others`;
@@ -30,7 +66,7 @@ export const createTask = async (req, res) => {
       stage: stage.toLowerCase(),
       date,
       priority: priority.toLowerCase(),
-      assets,
+      assets: [result?.url],
       activities: activity,
     });
 
@@ -51,16 +87,14 @@ export const createTask = async (req, res) => {
 
 export const duplicateTask = async (req, res) => {
   try {
-    const { id } = req.useParams;
+    const { id } = req.params;
 
     const task = await Task.findById(id);
 
-    if (task) {
-      const newTask = await Task.create({
-        ...task,
-        title: task.title + ' - Duplicate',
-      });
-    }
+    const newTask = await Task.create({
+      ...task,
+      title: task.title + ' - Duplicate',
+    });
 
     newTask.team = task.team;
     newTask.subTasks = task.subTasks;
@@ -82,7 +116,7 @@ export const duplicateTask = async (req, res) => {
         task.priority
       } priority, so check and act accordingly. The task date is ${task.date.toDateString()}. Thank you!!!`;
 
-    await Notice.create({
+    await Notification.create({
       team: task.team,
       text,
       task: newTask._id,
@@ -99,7 +133,7 @@ export const duplicateTask = async (req, res) => {
 
 export const postTaskActivity = async (req, res) => {
   try {
-    const { id } = req.useParams;
+    const { id } = req.params;
     const { userId } = req.user;
     const { type, activity } = req.body;
 
@@ -199,6 +233,7 @@ export const dashboardStatistics = async (req, res) => {
 
 export const getTasks = async (req, res) => {
   try {
+    const { userId, isAdmin } = req.user;
     const { stage, isTrashed } = req.query;
 
     let query = { isTrashed: isTrashed ? true : false };
@@ -207,12 +242,22 @@ export const getTasks = async (req, res) => {
       query.stage = stage;
     }
 
-    let queryResult = Task.find(query)
-      .populate({
-        path: 'team',
-        select: 'name title email',
-      })
-      .sort({ _id: -1 });
+    let queryResult = isAdmin
+      ? Task.find(query)
+          .populate({
+            path: 'team',
+            select: 'name title email',
+          })
+          .sort({ _id: -1 })
+      : Task.find({
+          ...query,
+          team: { $all: [userId] },
+        })
+          .populate({
+            path: 'team',
+            select: 'name title email',
+          })
+          .sort({ _id: -1 });
 
     const tasks = await queryResult;
 
