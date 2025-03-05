@@ -18,6 +18,8 @@ export const createJWT = (userId, res) => {
     httpOnly: true,
     sameSite: 'none', // prevent CSRF attacks
     secure: process.env.RENDER_ENV === 'production' || false,
-    maxAge: 24 * 60 * 60 * 1000, // 1 day
+    maxAge: 24 * 60 * 60 * 1000, // 1 day,
+    secure: true,
+    domain: 'http://localhost:3000',
   });
 };
