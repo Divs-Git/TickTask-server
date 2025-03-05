@@ -4,13 +4,14 @@ import User from '../models/user.js';
 const protectRoute = async (req, res, next) => {
   try {
     let token = req.cookies.token;
-
+    console.log(req.cookies);
+    console.log(token);
     if (token) {
       const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
       const resp = await User.findById(decodedToken.userId).select(
         'isAdmin email'
       );
-
+      console.log(resp);
       req.user = {
         email: resp.email,
         isAdmin: resp.isAdmin,
