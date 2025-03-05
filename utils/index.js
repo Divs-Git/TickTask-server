@@ -14,10 +14,12 @@ export const createJWT = (userId, res) => {
     expiresIn: '1d',
   });
 
+  console.log('JWT', token, process.env.JWT_SECRET);
+
   res.cookie('token', token, {
     httpOnly: true,
     sameSite: 'strict', // prevent CSRF attacks
-    secure: process.env.RENDER_ENV === 'production',
+    secure: process.env.RENDER_ENV === 'production' || false,
     maxAge: 24 * 60 * 60 * 1000, // 1 day
   });
 };
