@@ -17,7 +17,7 @@ export const createJWT = (userId, res) => {
   res.cookie('token', token, {
     httpOnly: true,
     sameSite: 'strict', // prevent CSRF attacks
-    secure: process.env.NODE_ENV !== 'development',
+    secure: process.env.RENDER_ENV === 'production',
     maxAge: 24 * 60 * 60 * 1000, // 1 day
   });
 };
